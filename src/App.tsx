@@ -5,7 +5,7 @@ import { ChatProvider } from "./context/ChatContext.tsx";
 const App: React.FC = () => {
   return (
     <ChatProvider>
-      <div className="flex w-screen h-screen bg-gradient-to-br from-gray-50 via-indigo-50 to-blue-100 overflow-hidden">
+      <div className="flex w-screen h-screen bg-gradient-to-br from-gray-50 via-indigo-50 to-blue-100">
         <Sidebar />
         <ChatPanel />
       </div>

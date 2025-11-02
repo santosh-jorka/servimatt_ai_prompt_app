@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, type ReactNode, useEffect } from "react";
 import { type Prompt } from "../components/PromptBubble";
+import { getAIResponse } from "../utils/aiService";
+
 
 interface ChatSession {
   id: string;
@@ -21,6 +23,7 @@ interface ChatContextType {
   setMessages: (chatId: string, messages: Prompt[]) => void;
   clearChat: (chatId: string) => void;     // ✅ new function
   clearError: () => void;
+  submitPrompt: (text: string) => Promise<void>; 
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -31,7 +34,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // ✅ Auto-select the first chat when available
+
   useEffect(() => {
     if (sessions.length > 0 && !currentId) {
       setCurrentId(sessions[0].id);
@@ -107,7 +110,6 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // ✅ Clear chat functionality
   const clearChat = (chatId: string) => {
     try {
       setLoading(true);
@@ -122,6 +124,50 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     }
   };
+
+ const submitPrompt = async (text: string) => {
+  if (!currentId) return;
+
+  const userMsg: Prompt = {
+    id: Date.now().toString(),
+    role: "user",
+    content: text,
+  };
+
+  addMessage(currentId, userMsg);
+  setLoading(true);
+  setError(null);
+
+  try {
+    const numChunks = Math.floor(Math.random() * 3) + 3;
+
+    for (let i = 1; i <= numChunks; i++) {
+      const ai = await getAIResponse(text, i, 1);
+
+      const aiMsg: Prompt = {
+        id: `${Date.now()}-${i}`,
+        role: "ai",
+        content: ai.text,
+      };
+
+      setSessions((prev) =>
+        prev.map((s) =>
+          s.id === currentId
+            ? { ...s, messages: [...s.messages, aiMsg] }
+            : s
+        )
+      );
+
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+  } catch (err) {
+    setError(err instanceof Error ? err.message : "Failed to fetch AI response.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   const clearError = () => setError(null);
 
@@ -140,8 +186,9 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         deleteChat,
         addMessage,
         setMessages,
-        clearChat,   // ✅ exposed
+        clearChat,   
         clearError,
+        submitPrompt,
       }}
     >
       {children}

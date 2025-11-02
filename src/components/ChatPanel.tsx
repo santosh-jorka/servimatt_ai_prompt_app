@@ -1,34 +1,10 @@
-import { useState } from "react";
 import { useChat } from "../context/ChatContext";
 import InputBox from "./InputBox";
-import { type Prompt } from "./PromptBubble";
 import ChatWindow from "./ChatWindow";
 
 const ChatPanel: React.FC = () => {
-  const { currentSession, addMessage } = useChat();
-  const [loading, setLoading] = useState(false);
+  const { currentSession, submitPrompt,loading  } = useChat();
 
-  // Dummy AI API simulation
-  const simulateAIResponse = (text: string): Promise<string> =>
-    new Promise((resolve) =>
-      setTimeout(() => resolve(`🤖 Dummy AI response for: "${text}"`), 1000)
-    );
-
-  const handleSubmit = async (text: string) => {
-    if (!currentSession || !text.trim()) return;
-
-    const userMsg: Prompt = { id: Date.now().toString(), role: "user", content: text };
-    addMessage(currentSession.id, userMsg);
-    setLoading(true);
-
-    const response = await simulateAIResponse(text);
-    const aiMsg: Prompt = { id: (Date.now() + 1).toString(), role: "ai", content: response };
-    addMessage(currentSession.id, aiMsg);
-
-    setLoading(false);
-  };
-
-  // 🧠 If there are no chats at all
   if (!currentSession) {
     return (
       <div className="flex-1 flex items-center justify-center text-gray-500 text-lg">
@@ -48,7 +24,7 @@ const ChatPanel: React.FC = () => {
       </section>
 
       <footer className="border-t border-gray-200">
-        <InputBox onSubmit={handleSubmit} loading={loading} />
+        <InputBox onSubmit={submitPrompt} loading={loading} />
       </footer>
     </main>
   );

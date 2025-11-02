@@ -9,7 +9,6 @@ const InputBox: React.FC<InputBoxProps> = ({ onSubmit, loading = false }) => {
   const [text, setText] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  // Auto-resize textarea height
   useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
@@ -18,7 +17,7 @@ const InputBox: React.FC<InputBoxProps> = ({ onSubmit, loading = false }) => {
   }, [text]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && e.shiftKey) return; // allow newline
+    if (e.key === "Enter" && e.shiftKey) return; 
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       if (text.trim() && !loading) {
